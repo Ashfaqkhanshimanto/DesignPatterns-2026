@@ -30,9 +30,9 @@ the three GoF pattern families are
 
 \- Creational - mainly about how objects are created
 
-\- Structural - mainly about how classes and objects are connected together
+\- Structural - mainly about how classes and objects are connected and organized together
 
-\- Behavioral - mainly about how objects communicate and how their behaviour works
+\- Behavioral - mainly about how objects communicate and how their behaviour can change
 
 
 
@@ -90,17 +90,17 @@ the four backend layers are
 
 
 
-\- domain - this is for the main business ideas and rules
+\- domain - this is for the main business ideas rules entities and pattern interfaces
 
-\- application - this is for use cases and things the application needs to do
+\- application - this is for use cases and coordinating what the application needs to do
 
-\- infrastructure - this is for technical things like database, settings and external services
+\- infrastructure - this is for technical things like database settings adapters and external services
 
-\- interfaces/api - this is where the FastAPI routes and http requests are handled
+\- interfaces/api - this is where FastAPI routes and http requests and responses are handled
 
 
 
-for example FastAPI routes or database connection code should not be inside domain because domain should not depend on things like FastAPI or SQLAlchemy
+for example FastAPI routes or SQLAlchemy database code should not be inside domain because domain should not depend on those technical frameworks
 
 
 
@@ -132,7 +132,7 @@ it checks the database because just because FastAPI is running doesnt mean the w
 
 
 
-we use /scalar because Scalar is the api documentation tool used in this course and the normal FastAPI /docs page is disabled so we use Scalar instead
+we use /scalar because Scalar is the api documentation tool used in this course and the normal FastAPI /docs page is disabled so Scalar is used instead
 
 
 
@@ -142,7 +142,7 @@ we use /scalar because Scalar is the api documentation tool used in this course 
 
 
 
-Alembic is added from the beginning so the database changes can be tracked properly from the start
+Alembic is added from the beginning so database changes can be tracked properly from the start
 
 
 
@@ -150,7 +150,7 @@ the baseline migration also proves that Alembic can connect to postgres and run 
 
 
 
-if we manually create tables in postgres first and only add migrations later then the real database and migration history can become different. this can create problems later when the project is run on another computer
+if we manually create tables in postgres first and only add migrations later then the real database structure and migration history can become different. this can create problems later when the project is run on another computer
 
 
 
@@ -160,23 +160,23 @@ if we manually create tables in postgres first and only add migrations later the
 
 
 
-\### 8. Explain dependency direction in this skeleton. Why must domain code not import FastAPI, SQLAlchemy, or Pydantic models used as HTTP schemas?
+\### 8. Explain dependency direction in this skeleton: which layers may import which? Why must domain code not import FastAPI, SQLAlchemy, or Pydantic models used as HTTP schemas?
 
 
 
-the main idea is that the important business logic should not depend on technical frameworks
+the dependency direction should go toward the important business logic
 
 
 
-the api layer can use application logic and the application layer can work with domain and infrastructure when needed
+the api layer can call the application layer. the application layer can use the domain and it can also work with infrastructure when needed
 
 
 
-domain should stay independent and should not import FastAPI, SQLAlchemy or http related Pydantic models
+the domain should stay independent and should not import FastAPI SQLAlchemy or http related Pydantic models
 
 
 
-this is useful because later if we change the api framework or database technology the main business logic should not need to be completely rewritten
+this is useful because if we change the api framework or database technology later the main business logic should not need to be completely rewritten
 
 
 
@@ -186,19 +186,19 @@ this is useful because later if we change the api framework or database technolo
 
 
 
-first i would check if postgres, backend and frontend are all actually running
+first i would check if postgres backend and frontend are all actually running
 
 
 
-then i would check /health directly and see if it returns the correct json
+then i would open /health directly and check if it returns the correct json
 
 
 
-after that i would check the api url and CORS settings to make sure the frontend is allowed to connect with the backend
+after that i would check the api url and CORS or proxy settings to make sure the frontend can communicate with the backend
 
 
 
-this is a phase 1 problem because it is about the basic connection between frontend backend and database. design patterns come later and they are not the first thing to check for a basic connection problem
+this is a phase 1 problem because it is about the basic connection between frontend backend and database. design patterns come later and they are not the first thing to check for this kind of connection problem
 
 
 
@@ -212,13 +212,13 @@ after phase 1 we mostly have the working base of the project but we still dont h
 
 
 
-for example we dont have real devices, sensors, locations, automation rules, actuator states, commands, alerts or websocket updates yet
+for example we dont have real devices sensors locations automation rules actuator states commands alerts or websocket updates yet
 
 
 
-the later phases will add these things step by step using patterns like Factory Method, Abstract Factory, Builder, Adapter, Strategy, Facade, State, Decorator, Command and Observer
+the later phases will add these things step by step using Factory Method Abstract Factory Builder Adapter Strategy Facade State Decorator Command and Observer
 
 
 
-because phase 1 already gives us the backend structure, database migrations, api setup and frontend shell we can add those features later without rebuilding the whole project again
+because phase 1 already gives us the backend structure database migrations api setup and frontend shell we can add those features later without rebuilding the whole project again
 
