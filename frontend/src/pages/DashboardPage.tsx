@@ -1,9 +1,7 @@
-const sections = [
-  {
-    id: "sensors",
-    title: "Sensors",
-    description: "Sensor devices and readings will appear here.",
-  },
+import SensorList from "../features/sensors/SensorList";
+
+
+const otherSections = [
   {
     id: "configuration",
     title: "Configuration",
@@ -31,24 +29,47 @@ const sections = [
   },
 ];
 
+
 export default function DashboardPage() {
   return (
     <section className="space-y-6">
       <div>
-        <h2 className="text-3xl font-bold">Dashboard</h2>
+        <h2 className="text-3xl font-bold">
+          Dashboard
+        </h2>
+
         <p className="mt-2 text-slate-600">
           Smart greenhouse system overview and controls.
         </p>
       </div>
 
+
+      <article
+        id="sensors"
+        className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
+      >
+        <h3 className="text-xl font-semibold">
+          Sensors
+        </h3>
+
+        <p className="mt-2 text-sm text-slate-500">
+          Create and view greenhouse sensors.
+        </p>
+
+        <SensorList />
+      </article>
+
+
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {sections.map((section) => (
+        {otherSections.map((section) => (
           <article
             key={section.id}
             id={section.id}
             className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
           >
-            <h3 className="text-lg font-semibold">{section.title}</h3>
+            <h3 className="text-lg font-semibold">
+              {section.title}
+            </h3>
 
             <p className="mt-2 text-sm text-slate-500">
               {section.description}

@@ -4,6 +4,7 @@ from scalar_fastapi import get_scalar_api_reference
 
 from infrastructure.settings import settings
 from interfaces.api.health import router as health_router
+from interfaces.api.sensors import router as sensors_router
 
 
 app = FastAPI(
@@ -12,7 +13,6 @@ app = FastAPI(
     docs_url=None,
     redoc_url=None,
 )
-
 
 cors_origins = [
     origin.strip()
@@ -28,8 +28,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
 app.include_router(health_router)
+app.include_router(sensors_router)
 
 
 @app.get("/")

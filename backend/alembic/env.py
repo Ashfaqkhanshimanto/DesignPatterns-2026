@@ -17,10 +17,12 @@ sys.path.insert(0, str(SRC_DIR))
 
 
 # ---------------------------------------------------------
-# Import the same settings used by the FastAPI application
+# Import application settings and ORM metadata
 # ---------------------------------------------------------
 
 from infrastructure.settings import settings
+from infrastructure.persistence.base import Base
+from infrastructure.persistence import models
 
 
 # ---------------------------------------------------------
@@ -30,21 +32,19 @@ from infrastructure.settings import settings
 config = context.config
 
 
-# Configure logging from alembic.ini
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
 
-# Use the exact same DATABASE_URL as the application
 config.set_main_option(
     "sqlalchemy.url",
     settings.database_url,
 )
 
 
-# Phase 1 intentionally has no ORM models yet.
-# Phase 2 will introduce models and metadata.
-target_metadata = None
+# Alembic will compare this metadata with the real database
+# when we run --autogenerate.
+target_metadata = Base.metadata
 
 
 # ---------------------------------------------------------
