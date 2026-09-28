@@ -1,3 +1,4 @@
+import DeviceList from "../features/devices/DeviceList";
 import SensorList from "../features/sensors/SensorList";
 
 
@@ -57,6 +58,14 @@ export default function DashboardPage() {
         </p>
 
         <SensorList />
+      </article>
+
+
+      <article
+        id="devices"
+        className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
+      >
+        <DeviceList />
       </article>
 
 

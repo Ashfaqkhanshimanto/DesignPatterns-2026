@@ -5,6 +5,7 @@ WORKDIR /app
 COPY pyproject.toml ./
 COPY src ./src
 COPY alembic ./alembic
+COPY tests ./tests
 COPY alembic.ini ./
 
 RUN pip install --no-cache-dir -e ".[dev]"
