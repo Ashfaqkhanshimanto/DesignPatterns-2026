@@ -10,3 +10,9 @@ class DeviceDto(BaseModel):
     device_family: str
     display_name: str
     default_config: dict[str, object]
+    zone_id: UUID | None = None
+    location_id: UUID | None = None
+
+
+class DeviceZoneAssignmentRequest(BaseModel):
+    zone_id: UUID | None

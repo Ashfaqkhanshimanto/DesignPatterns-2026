@@ -1,9 +1,11 @@
+from uuid import UUID
+
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from domain.devices.entity import Device
 from domain.sensors.entity import Sensor
-from infrastructure.persistence.models import DeviceRow
+from infrastructure.persistence.models import DeviceRow, ZoneRow
 
 
 class DeviceRepository:
@@ -54,6 +56,8 @@ class DeviceRepository:
             device_family=device.device_family,
             display_name=device.display_name,
             default_config=device.default_config,
+            zone_id=device.zone_id,
+            location_id=device.location_id,
         )
 
         self._db.add(row)
@@ -70,6 +74,8 @@ class DeviceRepository:
                 device_family=device.device_family,
                 display_name=device.display_name,
                 default_config=device.default_config,
+                zone_id=device.zone_id,
+                location_id=device.location_id,
             )
             for device in devices
         ]
@@ -114,6 +120,85 @@ class DeviceRepository:
         ]
 
     # ---------------------------------------------------------
+    # Phase 4 device assignment methods
+    # ---------------------------------------------------------
+
+    def get_device(
+        self,
+        device_id: UUID,
+    ) -> Device | None:
+        row = self._db.get(
+            DeviceRow,
+            device_id,
+        )
+
+        if row is None:
+            return None
+
+        return self._row_to_device(row)
+
+    def assign_device_to_zone(
+        self,
+        device_id: UUID,
+        zone_id: UUID,
+    ) -> Device | None:
+        device_row = self._db.get(
+            DeviceRow,
+            device_id,
+        )
+
+        if device_row is None:
+            return None
+
+        zone_row = self._db.get(
+            ZoneRow,
+            zone_id,
+        )
+
+        if zone_row is None:
+            raise LookupError(
+                f"Zone {zone_id} was not found."
+            )
+
+        try:
+            device_row.zone_id = zone_row.id
+            device_row.location_id = zone_row.location_id
+
+            self._db.commit()
+            self._db.refresh(device_row)
+
+            return self._row_to_device(device_row)
+
+        except Exception:
+            self._db.rollback()
+            raise
+
+    def unassign_device(
+        self,
+        device_id: UUID,
+    ) -> Device | None:
+        device_row = self._db.get(
+            DeviceRow,
+            device_id,
+        )
+
+        if device_row is None:
+            return None
+
+        try:
+            device_row.zone_id = None
+            device_row.location_id = None
+
+            self._db.commit()
+            self._db.refresh(device_row)
+
+            return self._row_to_device(device_row)
+
+        except Exception:
+            self._db.rollback()
+            raise
+
+    # ---------------------------------------------------------
     # Row -> domain mapping
     # ---------------------------------------------------------
 
@@ -135,4 +220,6 @@ class DeviceRepository:
             device_family=row.device_family,
             display_name=row.display_name or "",
             default_config=row.default_config,
+            zone_id=row.zone_id,
+            location_id=row.location_id,
         )

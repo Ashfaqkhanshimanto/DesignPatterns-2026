@@ -1,13 +1,9 @@
 import DeviceList from "../features/devices/DeviceList";
+import LocationConfiguration from "../features/locations/LocationConfiguration";
 import SensorList from "../features/sensors/SensorList";
 
 
 const otherSections = [
-  {
-    id: "configuration",
-    title: "Configuration",
-    description: "Greenhouse and zone configuration will appear here.",
-  },
   {
     id: "automation",
     title: "Automation",
@@ -66,6 +62,14 @@ export default function DashboardPage() {
         className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
       >
         <DeviceList />
+      </article>
+
+
+      <article
+        id="configuration"
+        className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
+      >
+        <LocationConfiguration />
       </article>
 
 
