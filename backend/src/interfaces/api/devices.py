@@ -10,6 +10,7 @@ from application.devices.assignment_service import (
 )
 from application.devices.dto import (
     DeviceDto,
+    DeviceSamplingRequest,
     DeviceZoneAssignmentRequest,
 )
 from application.devices.family_service import DeviceFamilyService
@@ -104,5 +105,33 @@ def assign_device_to_zone(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=str(error),
         ) from error
+
+    return device_to_dto(device)
+
+
+@router.patch(
+    "/{device_id}/sampling",
+    response_model=DeviceDto,
+)
+def update_device_sampling(
+    device_id: UUID,
+    request: DeviceSamplingRequest,
+    db: Session = Depends(get_db),
+) -> DeviceDto:
+    repository = DeviceRepository(db)
+
+    device = repository.update_sampling(
+        device_id=device_id,
+        sampling_interval_seconds=(
+            request.sampling_interval_seconds
+        ),
+        tracking_enabled=request.tracking_enabled,
+    )
+
+    if device is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Device {device_id} was not found.",
+        )
 
     return device_to_dto(device)

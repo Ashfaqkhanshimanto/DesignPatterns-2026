@@ -58,6 +58,8 @@ class DeviceRepository:
             default_config=device.default_config,
             zone_id=device.zone_id,
             location_id=device.location_id,
+            sampling_interval_seconds=device.sampling_interval_seconds,
+            tracking_enabled=device.tracking_enabled,
         )
 
         self._db.add(row)
@@ -76,6 +78,8 @@ class DeviceRepository:
                 default_config=device.default_config,
                 zone_id=device.zone_id,
                 location_id=device.location_id,
+                sampling_interval_seconds=device.sampling_interval_seconds,
+                tracking_enabled=device.tracking_enabled,
             )
             for device in devices
         ]
@@ -199,6 +203,60 @@ class DeviceRepository:
             raise
 
     # ---------------------------------------------------------
+    # Phase 5 sampling methods
+    # ---------------------------------------------------------
+
+    def update_sampling(
+        self,
+        device_id: UUID,
+        sampling_interval_seconds: int,
+        tracking_enabled: bool,
+    ) -> Device | None:
+        device_row = self._db.get(
+            DeviceRow,
+            device_id,
+        )
+
+        if device_row is None:
+            return None
+
+        try:
+            device_row.sampling_interval_seconds = (
+                sampling_interval_seconds
+            )
+            device_row.tracking_enabled = tracking_enabled
+
+            self._db.commit()
+            self._db.refresh(device_row)
+
+            return self._row_to_device(device_row)
+
+        except Exception:
+            self._db.rollback()
+            raise
+
+    def list_tracked_simulation_sensors(
+        self,
+    ) -> list[Device]:
+        statement = (
+            select(DeviceRow)
+            .where(DeviceRow.role == "sensor")
+            .where(DeviceRow.tracking_enabled.is_(True))
+            .where(
+                DeviceRow.default_config["protocol"].astext
+                == "simulation"
+            )
+            .order_by(DeviceRow.created_at.asc())
+        )
+
+        rows = self._db.scalars(statement).all()
+
+        return [
+            self._row_to_device(row)
+            for row in rows
+        ]
+
+    # ---------------------------------------------------------
     # Row -> domain mapping
     # ---------------------------------------------------------
 
@@ -222,4 +280,6 @@ class DeviceRepository:
             default_config=row.default_config,
             zone_id=row.zone_id,
             location_id=row.location_id,
+            sampling_interval_seconds=row.sampling_interval_seconds,
+            tracking_enabled=row.tracking_enabled,
         )

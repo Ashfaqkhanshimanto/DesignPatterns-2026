@@ -1,7 +1,18 @@
 from datetime import datetime
 from uuid import UUID
 
-from sqlalchemy import DateTime, ForeignKey, Index, Numeric, String, func, text
+from sqlalchemy import (
+    Boolean,
+    DateTime,
+    ForeignKey,
+    Index,
+    Integer,
+    Numeric,
+    String,
+    desc,
+    func,
+    text,
+)
 from sqlalchemy.dialects.postgresql import JSONB, UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -119,6 +130,18 @@ class DeviceRow(Base):
         nullable=True,
     )
 
+    sampling_interval_seconds: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        server_default=text("300"),
+    )
+
+    tracking_enabled: Mapped[bool] = mapped_column(
+        Boolean,
+        nullable=False,
+        server_default=text("true"),
+    )
+
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,
@@ -130,4 +153,49 @@ class DeviceRow(Base):
         Index("ix_devices_family", "device_family"),
         Index("ix_devices_zone_id", "zone_id"),
         Index("ix_devices_location_id", "location_id"),
+    )
+
+
+class ReadingRow(Base):
+    __tablename__ = "sensor_readings"
+
+    id: Mapped[UUID] = mapped_column(
+        PG_UUID(as_uuid=True),
+        primary_key=True,
+        server_default=text("gen_random_uuid()"),
+    )
+
+    device_id: Mapped[UUID] = mapped_column(
+        PG_UUID(as_uuid=True),
+        ForeignKey("devices.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+
+    value: Mapped[float] = mapped_column(
+        Numeric,
+        nullable=False,
+    )
+
+    unit: Mapped[str] = mapped_column(
+        String(32),
+        nullable=False,
+    )
+
+    source: Mapped[str] = mapped_column(
+        String(32),
+        nullable=False,
+    )
+
+    recorded_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )
+
+    __table_args__ = (
+        Index(
+            "ix_sensor_readings_device_recorded_at",
+            "device_id",
+            desc("recorded_at"),
+        ),
     )
