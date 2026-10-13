@@ -1,3 +1,4 @@
+
 import asyncio
 from contextlib import asynccontextmanager
 
@@ -11,10 +12,12 @@ from infrastructure.persistence.device_repository import DeviceRepository
 from infrastructure.persistence.reading_repository import ReadingRepository
 from infrastructure.persistence.session import SessionLocal
 from infrastructure.settings import settings
+
 from interfaces.api.health import router as health_router
 from interfaces.api.sensors import router as sensors_router
 from interfaces.api.devices import router as devices_router
 from interfaces.api.locations import router as locations_router
+from interfaces.api.automation import router as automation_router
 
 
 async def sampling_loop() -> None:
@@ -91,6 +94,7 @@ app.include_router(health_router)
 app.include_router(sensors_router)
 app.include_router(devices_router)
 app.include_router(locations_router)
+app.include_router(automation_router)
 
 
 @app.get("/")

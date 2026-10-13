@@ -512,3 +512,81 @@ export async function updateDeviceSampling(
 
   return response.json();
 }
+
+
+export type StrategyKey = "conservative" | "aggressive";
+
+export type StrategyResponse = {
+  location_id: string;
+  strategy_key: StrategyKey;
+};
+
+export type ZoneRecommendationDto = {
+  zone_id: string;
+  action: string;
+  reason: string;
+  score: number | null;
+};
+
+export type AutomationEvaluationDto = {
+  location_id: string;
+  strategy_key: StrategyKey;
+  action: string;
+  reason: string;
+  zones: ZoneRecommendationDto[];
+};
+
+export async function fetchSavedStrategy(
+  locationId: string,
+): Promise<StrategyResponse> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/locations/${locationId}/automation/strategy`,
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to load saved strategy");
+  }
+
+  return response.json();
+}
+
+export async function saveAutomationStrategy(
+  locationId: string,
+  strategyKey: StrategyKey,
+): Promise<StrategyResponse> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/locations/${locationId}/automation/strategy`,
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        strategy_key: strategyKey,
+      }),
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to save automation strategy");
+  }
+
+  return response.json();
+}
+
+export async function evaluateAutomation(
+  locationId: string,
+): Promise<AutomationEvaluationDto> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/locations/${locationId}/automation/evaluate`,
+    {
+      method: "POST",
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to evaluate automation");
+  }
+
+  return response.json();
+}

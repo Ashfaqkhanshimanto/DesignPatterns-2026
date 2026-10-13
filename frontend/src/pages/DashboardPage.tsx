@@ -1,14 +1,11 @@
 import DeviceList from "../features/devices/DeviceList";
 import LocationConfiguration from "../features/locations/LocationConfiguration";
 import SensorList from "../features/sensors/SensorList";
+import StrategyPanel from "../features/automation/StrategyPanel";
 
 
 const otherSections = [
-  {
-    id: "automation",
-    title: "Automation",
-    description: "Automation strategies and policies will appear here.",
-  },
+ 
   {
     id: "overview",
     title: "Overview",
@@ -73,6 +70,12 @@ export default function DashboardPage() {
       </article>
 
 
+      <article
+  id="automation"
+  className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
+>
+  <StrategyPanel />
+</article>
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {otherSections.map((section) => (
           <article
