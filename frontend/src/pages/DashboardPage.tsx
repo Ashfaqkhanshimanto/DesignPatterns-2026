@@ -1,16 +1,12 @@
+
 import DeviceList from "../features/devices/DeviceList";
 import LocationConfiguration from "../features/locations/LocationConfiguration";
 import SensorList from "../features/sensors/SensorList";
 import StrategyPanel from "../features/automation/StrategyPanel";
+import OverviewPanel from "../components/overview/OverviewPanel";
 
 
 const otherSections = [
- 
-  {
-    id: "overview",
-    title: "Overview",
-    description: "System overview information will appear here.",
-  },
   {
     id: "controls",
     title: "Controls",
@@ -37,7 +33,7 @@ export default function DashboardPage() {
         </p>
       </div>
 
-
+      {/* Phase 2 - Sensors */}
       <article
         id="sensors"
         className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
@@ -53,7 +49,7 @@ export default function DashboardPage() {
         <SensorList />
       </article>
 
-
+      {/* Phase 3 - Devices */}
       <article
         id="devices"
         className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
@@ -61,7 +57,7 @@ export default function DashboardPage() {
         <DeviceList />
       </article>
 
-
+      {/* Phase 4 - Location Configuration */}
       <article
         id="configuration"
         className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
@@ -69,13 +65,23 @@ export default function DashboardPage() {
         <LocationConfiguration />
       </article>
 
-
+      {/* Phase 6 - Strategy Pattern */}
       <article
-  id="automation"
-  className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
->
-  <StrategyPanel />
-</article>
+        id="automation"
+        className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
+      >
+        <StrategyPanel />
+      </article>
+
+      {/* Phase 7 - Facade Pattern */}
+      <article
+        id="overview"
+        className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
+      >
+        <OverviewPanel />
+      </article>
+
+      {/* Future sections */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {otherSections.map((section) => (
           <article

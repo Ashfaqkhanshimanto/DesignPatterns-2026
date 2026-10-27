@@ -590,3 +590,65 @@ export async function evaluateAutomation(
 
   return response.json();
 }
+
+export type OverviewDeviceDto = {
+  id: string;
+  device_type: string;
+  role: string;
+  display_name: string | null;
+};
+
+export type OverviewReadingDto = {
+  device_id: string;
+  value: number;
+  unit: string;
+  recorded_at: string;
+  tracking_enabled: boolean;
+  sampling_interval_seconds: number;
+};
+
+export type OverviewZoneDto = {
+  id: string;
+  name: string;
+  moisture_threshold_low: number;
+  moisture_threshold_high: number;
+  devices: OverviewDeviceDto[];
+  latest_readings: OverviewReadingDto[];
+};
+
+export type LocationOverviewDto = {
+  location: {
+    id: string;
+    name: string;
+  };
+  device_counts: {
+    sensor: number;
+    actuator: number;
+  };
+  zones: OverviewZoneDto[];
+  strategy_key: string | null;
+  last_recommendation: {
+    action: string;
+    reason: string;
+  } | null;
+};
+
+export async function fetchLocationOverview(
+  locationId: string,
+): Promise<LocationOverviewDto> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/locations/${encodeURIComponent(locationId)}/overview`,
+  );
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => null);
+
+    throw new Error(
+      typeof error?.detail === "string"
+        ? error.detail
+        : "Failed to load location overview",
+    );
+  }
+
+  return response.json();
+}
