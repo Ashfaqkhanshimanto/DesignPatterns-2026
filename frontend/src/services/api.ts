@@ -12,6 +12,7 @@ export type SensorDto = {
 };
 
 
+
 export type DeviceDto = {
   id: string;
   device_type: string;
@@ -23,7 +24,10 @@ export type DeviceDto = {
   location_id: string | null;
   sampling_interval_seconds: number;
   tracking_enabled: boolean;
+  state: string | null;
+  allowed_commands: string[];
 };
+
 
 
 export type ReadingDto = {

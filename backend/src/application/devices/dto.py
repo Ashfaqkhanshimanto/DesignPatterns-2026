@@ -1,3 +1,4 @@
+
 from uuid import UUID
 
 from pydantic import BaseModel, Field
@@ -14,6 +15,11 @@ class DeviceDto(BaseModel):
     location_id: UUID | None = None
     sampling_interval_seconds: int
     tracking_enabled: bool
+
+    # Phase 8: Actuator lifecycle information.
+    # Sensors do not have actuator states.
+    state: str | None = None
+    allowed_commands: list[str] = Field(default_factory=list)
 
 
 class DeviceZoneAssignmentRequest(BaseModel):

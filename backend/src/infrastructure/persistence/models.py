@@ -242,3 +242,26 @@ class AutomationRuleRow(Base):
             "location_id",
         ),
     )
+
+
+class ActuatorStateRow(Base):
+    __tablename__ = "actuator_states"
+
+    device_id: Mapped[UUID] = mapped_column(
+        PG_UUID(as_uuid=True),
+        ForeignKey("devices.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
+
+    state: Mapped[str] = mapped_column(
+        String(32),
+        nullable=False,
+        server_default=text("'idle'"),
+    )
+
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
+    )

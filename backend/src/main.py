@@ -19,7 +19,7 @@ from interfaces.api.devices import router as devices_router
 from interfaces.api.locations import router as locations_router
 from interfaces.api.automation import router as automation_router
 from interfaces.api.overview import router as overview_router
-
+from interfaces.api.actuator_states import router as actuator_states_router
 
 async def sampling_loop() -> None:
     while True:
@@ -97,6 +97,7 @@ app.include_router(devices_router)
 app.include_router(locations_router)
 app.include_router(automation_router)
 app.include_router(overview_router)
+app.include_router(actuator_states_router)
 
 
 @app.get("/")

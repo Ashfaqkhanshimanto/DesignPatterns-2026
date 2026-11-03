@@ -1,8 +1,10 @@
+
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
+from application.actuators.service import ActuatorStateService
 from application.devices.assignment_service import (
     DeviceAssignmentService,
     DeviceNotFoundError,
@@ -15,6 +17,9 @@ from application.devices.dto import (
 )
 from application.devices.family_service import DeviceFamilyService
 from application.devices.mappers import device_to_dto, devices_to_dtos
+from infrastructure.persistence.actuator_state_repository import (
+    ActuatorStateRepository,
+)
 from infrastructure.persistence.device_repository import DeviceRepository
 from infrastructure.persistence.session import get_db
 
@@ -23,6 +28,37 @@ router = APIRouter(
     prefix="/api/devices",
     tags=["devices"],
 )
+
+
+def add_actuator_state(
+    device: DeviceDto,
+    state_service: ActuatorStateService,
+) -> DeviceDto:
+    # Sensors do not have actuator lifecycle states.
+    if device.role != "actuator":
+        return device
+
+    # Load the real persisted state.
+    context = state_service.get_state(device.id)
+
+    device.state = context.state
+    device.allowed_commands = context.allowed_commands
+
+    return device
+
+
+def add_actuator_states(
+    devices: list[DeviceDto],
+    db: Session,
+) -> list[DeviceDto]:
+    state_service = ActuatorStateService(
+        ActuatorStateRepository(db)
+    )
+
+    return [
+        add_actuator_state(device, state_service)
+        for device in devices
+    ]
 
 
 @router.get(
@@ -43,7 +79,9 @@ def list_devices(
         role=role,
     )
 
-    return devices_to_dtos(devices)
+    result = devices_to_dtos(devices)
+
+    return add_actuator_states(result, db)
 
 
 @router.post(
@@ -67,7 +105,10 @@ def provision_devices(
             detail=str(error),
         ) from error
 
-    return devices_to_dtos(devices)
+    result = devices_to_dtos(devices)
+
+    # Initialize newly provisioned actuators in PostgreSQL.
+    return add_actuator_states(result, db)
 
 
 @router.patch(
@@ -106,7 +147,9 @@ def assign_device_to_zone(
             detail=str(error),
         ) from error
 
-    return device_to_dto(device)
+    result = device_to_dto(device)
+
+    return add_actuator_states([result], db)[0]
 
 
 @router.patch(
@@ -134,4 +177,6 @@ def update_device_sampling(
             detail=f"Device {device_id} was not found.",
         )
 
-    return device_to_dto(device)
+    result = device_to_dto(device)
+
+    return add_actuator_states([result], db)[0]
