@@ -10,6 +10,7 @@ from sqlalchemy import (
     Integer,
     Numeric,
     String,
+    Text,
     desc,
     func,
     text,
@@ -19,6 +20,10 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from infrastructure.persistence.base import Base
 
+
+# ---------------------------------------------------------
+# Phase 4 - Locations
+# ---------------------------------------------------------
 
 class LocationRow(Base):
     __tablename__ = "locations"
@@ -40,6 +45,10 @@ class LocationRow(Base):
         server_default=func.now(),
     )
 
+
+# ---------------------------------------------------------
+# Phase 4 - Zones
+# ---------------------------------------------------------
 
 class ZoneRow(Base):
     __tablename__ = "zones"
@@ -81,6 +90,10 @@ class ZoneRow(Base):
         Index("ix_zones_location_id", "location_id"),
     )
 
+
+# ---------------------------------------------------------
+# Phases 2-5 - Devices
+# ---------------------------------------------------------
 
 class DeviceRow(Base):
     __tablename__ = "devices"
@@ -157,6 +170,10 @@ class DeviceRow(Base):
     )
 
 
+# ---------------------------------------------------------
+# Phase 5 - Sensor readings
+# ---------------------------------------------------------
+
 class ReadingRow(Base):
     __tablename__ = "sensor_readings"
 
@@ -202,6 +219,10 @@ class ReadingRow(Base):
     )
 
 
+# ---------------------------------------------------------
+# Phase 6 - Automation strategies
+# ---------------------------------------------------------
+
 class AutomationRuleRow(Base):
     __tablename__ = "automation_rules"
 
@@ -244,6 +265,10 @@ class AutomationRuleRow(Base):
     )
 
 
+# ---------------------------------------------------------
+# Phase 8 - Actuator lifecycle states
+# ---------------------------------------------------------
+
 class ActuatorStateRow(Base):
     __tablename__ = "actuator_states"
 
@@ -264,4 +289,53 @@ class ActuatorStateRow(Base):
         nullable=False,
         server_default=func.now(),
         onupdate=func.now(),
+    )
+
+
+# ---------------------------------------------------------
+# Phase 9 - Decorator execution log
+# ---------------------------------------------------------
+
+class ActuatorExecutionLogRow(Base):
+    __tablename__ = "actuator_execution_log"
+
+    id: Mapped[UUID] = mapped_column(
+        PG_UUID(as_uuid=True),
+        primary_key=True,
+        server_default=text("gen_random_uuid()"),
+    )
+
+    device_id: Mapped[UUID] = mapped_column(
+        PG_UUID(as_uuid=True),
+        ForeignKey("devices.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+
+    success: Mapped[bool] = mapped_column(
+        Boolean,
+        nullable=False,
+    )
+
+    policy_applied: Mapped[list[str]] = mapped_column(
+        JSONB,
+        nullable=False,
+    )
+
+    message: Mapped[str | None] = mapped_column(
+        Text,
+        nullable=True,
+    )
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )
+
+    __table_args__ = (
+        Index(
+            "ix_actuator_execution_log_device_created",
+            "device_id",
+            desc("created_at"),
+        ),
     )

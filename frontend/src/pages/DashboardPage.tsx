@@ -1,5 +1,6 @@
 
 import DeviceList from "../features/devices/DeviceList";
+import ExecutionLog from "../features/devices/ExecutionLog";
 import LocationConfiguration from "../features/locations/LocationConfiguration";
 import SensorList from "../features/sensors/SensorList";
 import StrategyPanel from "../features/automation/StrategyPanel";
@@ -7,11 +8,6 @@ import OverviewPanel from "../components/overview/OverviewPanel";
 
 
 const otherSections = [
-  {
-    id: "controls",
-    title: "Controls",
-    description: "Actuator controls will appear here.",
-  },
   {
     id: "events",
     title: "Events",
@@ -79,6 +75,14 @@ export default function DashboardPage() {
         className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
       >
         <OverviewPanel />
+      </article>
+
+      {/* Phase 9 - Decorator Pattern */}
+      <article
+        id="controls"
+        className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
+      >
+        <ExecutionLog />
       </article>
 
       {/* Future sections */}

@@ -20,6 +20,8 @@ from interfaces.api.locations import router as locations_router
 from interfaces.api.automation import router as automation_router
 from interfaces.api.overview import router as overview_router
 from interfaces.api.actuator_states import router as actuator_states_router
+from interfaces.api.actuators import router as actuators_router
+
 
 async def sampling_loop() -> None:
     while True:
@@ -91,6 +93,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Existing API routes
 app.include_router(health_router)
 app.include_router(sensors_router)
 app.include_router(devices_router)
@@ -98,6 +101,9 @@ app.include_router(locations_router)
 app.include_router(automation_router)
 app.include_router(overview_router)
 app.include_router(actuator_states_router)
+
+# Phase 9 - Decorator Pattern
+app.include_router(actuators_router)
 
 
 @app.get("/")
