@@ -1,6 +1,7 @@
 
 import DeviceList from "../features/devices/DeviceList";
 import ExecutionLog from "../features/devices/ExecutionLog";
+import CommandPanel from "../components/commands/CommandPanel";
 import LocationConfiguration from "../features/locations/LocationConfiguration";
 import SensorList from "../features/sensors/SensorList";
 import StrategyPanel from "../features/automation/StrategyPanel";
@@ -77,12 +78,17 @@ export default function DashboardPage() {
         <OverviewPanel />
       </article>
 
-      {/* Phase 9 - Decorator Pattern */}
+      {/* Phase 10 - Command Pattern */}
       <article
         id="controls"
-        className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
+        className="space-y-8 rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
       >
-        <ExecutionLog />
+        <CommandPanel />
+
+        {/* Phase 9 - Decorator Pattern */}
+        <div className="border-t border-slate-200 pt-6">
+          <ExecutionLog />
+        </div>
       </article>
 
       {/* Future sections */}

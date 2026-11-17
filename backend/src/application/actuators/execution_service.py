@@ -19,24 +19,46 @@ from infrastructure.persistence.execution_log_repository import (
 )
 
 
+def build_actuator_port(
+    db: Session,
+    repository: ExecutionLogRepository | None = None,
+) -> ActuatorPort:
+    """
+    Build the decorated actuator port.
+
+    Order:
+    Logging -> Max Runtime -> Simulation
+    """
+
+    if repository is None:
+        repository = ExecutionLogRepository(db)
+
+    # Existing Phase 5 simulation adapter
+    simulation: ActuatorPort = SimulationActuatorAdapter()
+
+    # Phase 9 maximum runtime policy
+    max_runtime: ActuatorPort = MaxRuntimeActuatorDecorator(
+        wrapped=simulation,
+        db=db,
+    )
+
+    # Outermost decorator records all attempts
+    logging: ActuatorPort = LoggingActuatorDecorator(
+        wrapped=max_runtime,
+        repository=repository,
+    )
+
+    return logging
+
+
 class ActuatorExecutionService:
-    """Runs commands through the decorated actuator port."""
+    """Executes commands through the decorated actuator port."""
 
     def __init__(self, db: Session) -> None:
         self._repository = ExecutionLogRepository(db)
 
-        # Innermost: existing Phase 5 simulation adapter
-        simulation: ActuatorPort = SimulationActuatorAdapter()
-
-        # Middle: check maximum running time
-        max_runtime: ActuatorPort = MaxRuntimeActuatorDecorator(
-            wrapped=simulation,
+        self._port = build_actuator_port(
             db=db,
-        )
-
-        # Outermost: record every execution attempt
-        self._port: ActuatorPort = LoggingActuatorDecorator(
-            wrapped=max_runtime,
             repository=self._repository,
         )
 
@@ -52,5 +74,8 @@ class ActuatorExecutionService:
             payload=payload,
         )
 
-    def list_recent(self, limit: int = 20):
+    def list_recent(
+        self,
+        limit: int = 20,
+    ):
         return self._repository.list_recent(limit)

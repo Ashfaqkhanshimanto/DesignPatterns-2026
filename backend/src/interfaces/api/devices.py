@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from application.actuators.service import ActuatorStateService
+from application.commands.service import commands_allowed_for_device
 from application.devices.assignment_service import (
     DeviceAssignmentService,
     DeviceNotFoundError,
@@ -30,6 +31,10 @@ router = APIRouter(
 )
 
 
+# ---------------------------------------------------------
+# Phase 8 and Phase 10 - Actuator state information
+# ---------------------------------------------------------
+
 def add_actuator_state(
     device: DeviceDto,
     state_service: ActuatorStateService,
@@ -38,11 +43,17 @@ def add_actuator_state(
     if device.role != "actuator":
         return device
 
-    # Load the real persisted state.
+    # Read the actuator's real saved state.
     context = state_service.get_state(device.id)
 
     device.state = context.state
-    device.allowed_commands = context.allowed_commands
+
+    # Include Phase 10 device-specific allowed commands.
+    # A running grow light can use set_light_level.
+    device.allowed_commands = commands_allowed_for_device(
+        context,
+        device.device_type,
+    )
 
     return device
 
@@ -60,6 +71,10 @@ def add_actuator_states(
         for device in devices
     ]
 
+
+# ---------------------------------------------------------
+# Phase 3 - List devices
+# ---------------------------------------------------------
 
 @router.get(
     "",
@@ -84,6 +99,10 @@ def list_devices(
     return add_actuator_states(result, db)
 
 
+# ---------------------------------------------------------
+# Phase 3 - Provision device families
+# ---------------------------------------------------------
+
 @router.post(
     "/provision",
     response_model=list[DeviceDto],
@@ -99,6 +118,7 @@ def provision_devices(
 
     try:
         devices = service.provision_family(family)
+
     except ValueError as error:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -107,9 +127,13 @@ def provision_devices(
 
     result = devices_to_dtos(devices)
 
-    # Initialize newly provisioned actuators in PostgreSQL.
+    # Initialize actuator states where necessary.
     return add_actuator_states(result, db)
 
+
+# ---------------------------------------------------------
+# Phase 4 - Assign or unassign devices to zones
+# ---------------------------------------------------------
 
 @router.patch(
     "/{device_id}/zone",
@@ -152,6 +176,10 @@ def assign_device_to_zone(
     return add_actuator_states([result], db)[0]
 
 
+# ---------------------------------------------------------
+# Phase 5 - Update sampling settings
+# ---------------------------------------------------------
+
 @router.patch(
     "/{device_id}/sampling",
     response_model=DeviceDto,
@@ -165,9 +193,7 @@ def update_device_sampling(
 
     device = repository.update_sampling(
         device_id=device_id,
-        sampling_interval_seconds=(
-            request.sampling_interval_seconds
-        ),
+        sampling_interval_seconds=request.sampling_interval_seconds,
         tracking_enabled=request.tracking_enabled,
     )
 

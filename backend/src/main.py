@@ -22,6 +22,9 @@ from interfaces.api.overview import router as overview_router
 from interfaces.api.actuator_states import router as actuator_states_router
 from interfaces.api.actuators import router as actuators_router
 
+# Phase 10 - Command Pattern
+from interfaces.api.commands import router as commands_router
+
 
 async def sampling_loop() -> None:
     while True:
@@ -93,7 +96,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Existing API routes
+# Existing routes from previous phases
 app.include_router(health_router)
 app.include_router(sensors_router)
 app.include_router(devices_router)
@@ -104,6 +107,9 @@ app.include_router(actuator_states_router)
 
 # Phase 9 - Decorator Pattern
 app.include_router(actuators_router)
+
+# Phase 10 - Command Pattern
+app.include_router(commands_router)
 
 
 @app.get("/")
